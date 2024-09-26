@@ -43,13 +43,14 @@ public class Bottle {
 
                 String requestLine = in.readLine();
                 if (requestLine == null) continue;
-
                 String[] requestParts = requestLine.split(" ");
                 String method = requestParts[0];
                 String fullPath = requestParts[1];
                 String path = fullPath.split("\\?")[0];
 
-                Request request = Request.fromUrl(path, method);
+
+
+                Request request = Request.fromBuffer(requestLine, in);
                 Response response = new Response();
 
                 if (path.endsWith(".css") || path.endsWith(".js")) {
@@ -92,6 +93,12 @@ public class Bottle {
         Bottle btl = new Bottle(9999);
         btl.get("/", (req, res) -> {
             res.renderHTML("templates/not-found.html");
+        });
+
+        btl.post("/", (req, res) -> {
+//            System.out.println(req.getBody());
+            System.out.println(req.getHeaders());
+            res.writeBody("helloe");
         });
 
         btl.start();

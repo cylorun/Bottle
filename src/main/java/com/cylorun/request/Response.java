@@ -10,6 +10,7 @@ public class Response {
     private ContentType contentType = ContentType.TEXT_HTML;
     private StringBuilder body = new StringBuilder();
     private static final String TEMPLATES_DIR = "templates/";
+
     public Response setStatus(int status) {
         this.status = status;
         return this;
@@ -46,23 +47,6 @@ public class Response {
         return this;
     }
 
-    private String fixTemplatePath(String templatePath) {
-        templatePath = templatePath.trim();
-
-        if (!templatePath.endsWith(".html")) {
-            throw new UnsupportedOperationException("Unsupported file type: " + templatePath);
-        }
-
-        if (templatePath.startsWith(TEMPLATES_DIR)) {
-            return templatePath;
-        }
-
-        if (templatePath.startsWith("/")) {
-            return TEMPLATES_DIR + templatePath.substring(1);
-        }
-
-        return TEMPLATES_DIR + templatePath;
-    }
 
     public Response serveStatic(String resourcePath) {
         String data;
@@ -92,5 +76,28 @@ public class Response {
         response.append("\r\n");
         response.append(this.body);
         return response.toString();
+    }
+
+    private static String fixTemplatePath(String templatePath) {
+        templatePath = templatePath.trim();
+
+        if (!templatePath.endsWith(".html")) {
+            throw new UnsupportedOperationException("Unsupported file type: " + templatePath);
+        }
+
+        if (templatePath.startsWith(TEMPLATES_DIR)) {
+            return templatePath;
+        }
+
+        if (templatePath.startsWith("/")) {
+            return TEMPLATES_DIR + templatePath.substring(1);
+        }
+
+        return TEMPLATES_DIR + templatePath;
+    }
+
+    @Override
+    public String toString() {
+        return this.getResponse();
     }
 }
