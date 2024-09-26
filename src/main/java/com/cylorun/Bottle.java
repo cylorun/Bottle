@@ -96,7 +96,6 @@ public class Bottle {
         });
 
         btl.post("/", (req, res) -> {
-//            System.out.println(req.getBody());
             System.out.println(req.getHeaders());
             res.writeBody("helloe");
         });

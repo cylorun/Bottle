@@ -13,9 +13,9 @@ import java.util.Optional;
 public class Request {
     private RequestMethod method;
     private ContentType contentType;
-    private String path;
-    private Query query;
-    private String body;
+    private final String path;
+    private final Query query;
+    private final String body;
     private Map<String, String> headers;
 
     private Request(RequestMethod method, Map<String, String> headers, String path, Query queryParams, String body) {
@@ -25,7 +25,9 @@ public class Request {
         this.query = queryParams;
         this.body = body;
 
-        this.contentType = ContentType.valueOf(this.headers.get("Content-Type"));
+        if (this.headers.containsKey("Content-Type")) {
+            this.contentType = ContentType.fromName(this.headers.get("Content-Type").trim()).orElse(null);
+        }
     }
 
 
@@ -38,9 +40,11 @@ public class Request {
 
         Map<String, String> headers = parseHeadersFromBuffer(in);
 
-        String requestBody = getBodyFromBuffer(in, Integer.parseInt(headers.get("Content-Length").trim())).orElse("");
+        String contentLenHeader = headers.get("Content-Length");
+        int contentLength =  contentLenHeader == null ? 0 : Integer.parseInt(contentLenHeader.trim());
+        String requestBody = getBodyFromBuffer(in, contentLength).orElse(null);
 
-        return new Request(method, headers, requestBody, queryParams, fullRequestPath);
+        return new Request(method, headers, fullRequestPath, queryParams, requestBody);
 
     }
 
@@ -75,6 +79,7 @@ public class Request {
         }
     }
 
+
     public RequestMethod getMethod() {
         return method;
     }
@@ -87,12 +92,12 @@ public class Request {
         return this.query;
     }
 
-    public String getBody() {
-        return this.body;
+    public Optional<String> getBody() {
+        return Optional.ofNullable(this.body);
     }
 
-    public ContentType getContentType() {
-        return this.contentType;
+    public Optional<ContentType> getContentType() {
+        return Optional.ofNullable(this.contentType);
     }
 
     public Map<String, String> getHeaders() {
