@@ -1,6 +1,8 @@
 package com.cylorun.request;
 
 
+import com.cylorun.request.body.BodyFactory;
+import com.cylorun.request.body.RequestBody;
 import com.cylorun.request.enums.ContentType;
 import com.cylorun.request.enums.RequestMethod;
 
@@ -15,10 +17,10 @@ public class Request {
     private ContentType contentType;
     private final String path;
     private final Query query;
-    private final String body;
+    private final RequestBody body;
     private Map<String, String> headers;
 
-    private Request(RequestMethod method, Map<String, String> headers, String path, Query queryParams, String body) {
+    private Request(RequestMethod method, Map<String, String> headers, String path, Query queryParams, RequestBody body) {
         this.method = method;
         this.headers = headers;
         this.path = path;
@@ -42,10 +44,9 @@ public class Request {
 
         String contentLenHeader = headers.get("Content-Length");
         int contentLength =  contentLenHeader == null ? 0 : Integer.parseInt(contentLenHeader.trim());
-        String requestBody = getBodyFromBuffer(in, contentLength).orElse(null);
-
-        return new Request(method, headers, fullRequestPath, queryParams, requestBody);
-
+        String requestBodyStr = getBodyFromBuffer(in, contentLength).orElse(null);
+        RequestBody reqBody = BodyFactory.createBody(requestBodyStr, ContentType.fromName("Content-Type").orElse(null)).orElse(null);
+        return new Request(method, headers, fullRequestPath, queryParams, reqBody);
     }
 
     private static Map<String, String> parseHeadersFromBuffer(BufferedReader in) {
@@ -92,7 +93,7 @@ public class Request {
         return this.query;
     }
 
-    public Optional<String> getBody() {
+    public Optional<RequestBody> getBody() {
         return Optional.ofNullable(this.body);
     }
 

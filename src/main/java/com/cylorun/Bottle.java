@@ -3,6 +3,7 @@ package com.cylorun;
 import com.cylorun.request.Request;
 import com.cylorun.request.RequestHandler;
 import com.cylorun.request.Response;
+import com.cylorun.request.enums.RequestMethod;
 import com.cylorun.route.RouteHandler;
 
 import java.io.BufferedReader;
@@ -74,19 +75,19 @@ public class Bottle {
     }
 
     public void get(String path, RequestHandler handler) {
-        this.routeHandler.addRoute("GET", path, handler);
+        this.routeHandler.addRoute(RequestMethod.GET, path, handler);
     }
 
     public void post(String path, RequestHandler handler) {
-        this.routeHandler.addRoute("POST", path, handler);
+        this.routeHandler.addRoute(RequestMethod.POST, path, handler);
     }
 
     public void put(String path, RequestHandler handler) {
-        this.routeHandler.addRoute("PUT", path, handler);
+        this.routeHandler.addRoute(RequestMethod.PUT, path, handler);
     }
 
     public void delete(String path, RequestHandler handler) {
-        this.routeHandler.addRoute("DELETE", path, handler);
+        this.routeHandler.addRoute(RequestMethod.DELETE, path, handler);
     }
 
     public static void main(String[] args) {
@@ -95,9 +96,12 @@ public class Bottle {
             res.renderHTML("templates/not-found.html");
         });
 
-        btl.post("/", (req, res) -> {
-            System.out.println(req.getHeaders());
-            res.writeBody("helloe");
+        btl.post("/" , (req, res) -> {
+
+        });
+
+        btl.get("/debug", (req, res) -> {
+            res.writeBody(String.format("Headers: %s\nRequest Query: %s \n", req.getHeaders(), req.getQuery()));
         });
 
         btl.start();

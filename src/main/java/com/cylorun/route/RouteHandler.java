@@ -14,8 +14,8 @@ public class RouteHandler {
         this.routes = new HashMap<>();
     }
 
-    public void addRoute(String method, String path, RequestHandler handler) {
-        this.routes.put(new Route(RequestMethod.valueOf(method), path), handler);
+    public void addRoute(RequestMethod method, String path, RequestHandler handler) {
+        this.routes.put(new Route(method, path), handler);
     }
 
     public RequestHandler getHandler(String method, String path) {
