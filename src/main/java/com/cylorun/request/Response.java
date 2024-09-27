@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 
 import java.io.FileNotFoundException;
 import java.io.PushbackInputStream;
+import java.util.Map;
 
 public class Response {
     private int status = 200;
@@ -29,6 +30,11 @@ public class Response {
         return this;
     }
 
+    public Response json(Map<?, ?> data) {
+        this.setContentType(ContentType.APPLICATION_JSON);
+        this.body = new StringBuilder(data.toString());
+        return this;
+    }
     public Response json(String data) {
         this.setContentType(ContentType.APPLICATION_JSON);
         this.body = new StringBuilder(data);
