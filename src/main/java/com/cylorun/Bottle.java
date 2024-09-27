@@ -97,7 +97,7 @@ public class Bottle {
         });
 
         btl.post("/" , (req, res) -> {
-
+            res.json("{\"jojoe\": 1}");
         });
 
         btl.get("/debug", (req, res) -> {

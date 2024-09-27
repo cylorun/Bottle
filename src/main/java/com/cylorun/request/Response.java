@@ -2,8 +2,11 @@ package com.cylorun.request;
 
 import com.cylorun.request.enums.ContentType;
 import com.cylorun.util.ResourceUtil;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.FileNotFoundException;
+import java.io.PushbackInputStream;
 
 public class Response {
     private int status = 200;
@@ -23,6 +26,18 @@ public class Response {
 
     public Response writeBody(String content) {
         this.body.append(content);
+        return this;
+    }
+
+    public Response json(String data) {
+        this.setContentType(ContentType.APPLICATION_JSON);
+        this.body = new StringBuilder(data);
+        return this;
+    }
+
+    public Response json(JsonElement data) {
+        this.setContentType(ContentType.APPLICATION_JSON);
+        this.body = new StringBuilder(data.toString());
         return this;
     }
 
