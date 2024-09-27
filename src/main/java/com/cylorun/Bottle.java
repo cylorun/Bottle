@@ -96,6 +96,7 @@ public class Bottle {
             res.renderHTML("templates/not-found.html");
         });
 
+
         btl.post("/" , (req, res) -> {
             res.json("{\"jojoe\": 1}");
         });
