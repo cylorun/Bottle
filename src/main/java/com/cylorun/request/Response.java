@@ -3,10 +3,8 @@ package com.cylorun.request;
 import com.cylorun.request.enums.ContentType;
 import com.cylorun.util.ResourceUtil;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import java.io.FileNotFoundException;
-import java.io.PushbackInputStream;
 import java.util.Map;
 
 public class Response {
@@ -35,6 +33,7 @@ public class Response {
         this.body = new StringBuilder(data.toString());
         return this;
     }
+
     public Response json(String data) {
         this.setContentType(ContentType.APPLICATION_JSON);
         this.body = new StringBuilder(data);
@@ -53,14 +52,11 @@ public class Response {
      * @param templateName - name of the html template to render
      * @return this
      */
-    public Response renderHTML(String templateName) {
+    public Response renderHTML(String templateName) throws FileNotFoundException {
         String templatePath = this.fixTemplatePath(templateName);
         String data;
-        try {
-            data = ResourceUtil.readFile(templatePath);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        data = ResourceUtil.readFile(templatePath);
+
 
         this.setContentType(ContentType.TEXT_HTML);
         this.writeBody(data);

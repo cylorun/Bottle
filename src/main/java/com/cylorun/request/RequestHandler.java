@@ -1,14 +1,16 @@
 package com.cylorun.request;
 
+import java.io.FileNotFoundException;
+
 public interface RequestHandler {
-    void handle(Request request, Response response, Runnable next);
+    void handle(Request request, Response response, Runnable next) throws FileNotFoundException;
 
     @FunctionalInterface
     interface BasicRequestHandler extends RequestHandler {
-        void handle(Request request, Response response);
+        void handle(Request request, Response response) throws FileNotFoundException;
 
         @Override
-        default void handle(Request request, Response response, Runnable next) {
+        default void handle(Request request, Response response, Runnable next) throws FileNotFoundException {
             this.handle(request, response);
             next.run();
         }

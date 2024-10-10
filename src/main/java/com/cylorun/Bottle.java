@@ -6,12 +6,10 @@ import com.cylorun.request.Response;
 import com.cylorun.request.enums.RequestMethod;
 import com.cylorun.route.RouteHandler;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
 
 public class Bottle {
 
@@ -49,8 +47,6 @@ public class Bottle {
                 String fullPath = requestParts[1];
                 String path = fullPath.split("\\?")[0];
 
-
-
                 Request request = Request.fromBuffer(requestLine, in);
                 Response response = new Response();
 
@@ -70,6 +66,11 @@ public class Bottle {
                     } else {
                         response.setStatus(404);
                         response.writeBody("404 Not Found");
+                        try {
+                            response.renderHTML("not-found.html");
+                        } catch (FileNotFoundException e) {
+                            System.out.println("not-found.html file not found. ok.");
+                        }
                     }
                 }
 
@@ -80,6 +81,14 @@ public class Bottle {
             }
         }
     }
+
+    public void use(RequestHandler.MiddlewareRequestHandler handler) {
+
+    }
+    public void use(String path, RequestHandler.MiddlewareRequestHandler handler) {
+
+    }
+
 
     public void get(String path, RequestHandler.BasicRequestHandler handler) {
         this.routeHandler.addRoute(RequestMethod.GET, path, handler);
@@ -100,7 +109,7 @@ public class Bottle {
     public static void main(String[] args) {
         Bottle btl = new Bottle(9999);
         btl.get("/", (req, res) -> {
-            res.renderHTML("templates/not-found.html");
+            res.renderHTML("not-found.html");
         });
 
 
