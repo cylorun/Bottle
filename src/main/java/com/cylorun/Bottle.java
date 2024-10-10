@@ -59,7 +59,14 @@ public class Bottle {
                 } else {
                     RequestHandler handler = this.routeHandler.getHandler(method, path);
                     if (handler != null) {
-                        handler.handle(request, response);
+                        if (handler instanceof RequestHandler.BasicRequestHandler basicHandler) {
+                            basicHandler.handle(request, response);
+                        }
+                        if (handler instanceof RequestHandler.MiddlewareRequestHandler middlewareHandler) {
+                            middlewareHandler.handle(request, response, () -> {
+                                System.out.println("next.");
+                            });
+                        }
                     } else {
                         response.setStatus(404);
                         response.writeBody("404 Not Found");
@@ -74,19 +81,19 @@ public class Bottle {
         }
     }
 
-    public void get(String path, RequestHandler handler) {
+    public void get(String path, RequestHandler.BasicRequestHandler handler) {
         this.routeHandler.addRoute(RequestMethod.GET, path, handler);
     }
 
-    public void post(String path, RequestHandler handler) {
+    public void post(String path, RequestHandler.BasicRequestHandler handler) {
         this.routeHandler.addRoute(RequestMethod.POST, path, handler);
     }
 
-    public void put(String path, RequestHandler handler) {
+    public void put(String path, RequestHandler.BasicRequestHandler handler) {
         this.routeHandler.addRoute(RequestMethod.PUT, path, handler);
     }
 
-    public void delete(String path, RequestHandler handler) {
+    public void delete(String path, RequestHandler.BasicRequestHandler handler) {
         this.routeHandler.addRoute(RequestMethod.DELETE, path, handler);
     }
 
