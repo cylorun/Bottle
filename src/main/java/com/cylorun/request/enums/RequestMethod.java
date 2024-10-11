@@ -4,7 +4,8 @@ public enum RequestMethod {
     GET("GET"),
     POST("POST"),
     PUT("PUT"),
-    DELETE("DELETE");
+    DELETE("DELETE"),
+    ANY("ANY");
     private final String name;
 
     private RequestMethod(String name) {

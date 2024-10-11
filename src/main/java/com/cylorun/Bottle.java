@@ -9,7 +9,11 @@ import com.cylorun.route.RouteHandler;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class Bottle {
 
@@ -53,24 +57,24 @@ public class Bottle {
                 if (path.endsWith(".css") || path.endsWith(".js")) {
                     response.serveStatic("static" + path);
                 } else {
-                    RequestHandler handler = this.routeHandler.getHandler(method, path);
-                    if (handler != null) {
-                        if (handler instanceof RequestHandler.BasicRequestHandler basicHandler) {
-                            basicHandler.handle(request, response);
+                    List<RequestHandler> handlers = this.routeHandler.getHandlers(method, path);
+                    if (!handlers.isEmpty()) {
+                        AtomicBoolean b = new AtomicBoolean(false);
+                        for (RequestHandler handler : handlers) {
+                            if (handler instanceof RequestHandler.BasicRequestHandler basicHandler) {
+                                basicHandler.handle(request, response);
+                                break; // only one basic req handler per path
+                            }
+                            if (handler instanceof RequestHandler.MiddlewareRequestHandler middlewareHandler) {
+                                middlewareHandler.handle(request, response, () -> {
+                                    b.set(true);
+                                });
+                            }
                         }
-                        if (handler instanceof RequestHandler.MiddlewareRequestHandler middlewareHandler) {
-                            middlewareHandler.handle(request, response, () -> {
-                                System.out.println("next.");
-                            });
-                        }
-                    } else {
-                        response.setStatus(404);
-                        response.writeBody("404 Not Found");
-                        try {
-                            response.renderHTML("not-found.html");
-                        } catch (FileNotFoundException e) {
-                            System.out.println("not-found.html file not found. ok.");
-                        }
+                    }
+
+                    if (handlers.stream().allMatch(h -> h instanceof RequestHandler.MiddlewareRequestHandler)){
+
                     }
                 }
 
@@ -83,10 +87,19 @@ public class Bottle {
     }
 
     public void use(RequestHandler.MiddlewareRequestHandler handler) {
-
+        this.routeHandler.addRoute(RequestMethod.ANY, "*", handler);
     }
-    public void use(String path, RequestHandler.MiddlewareRequestHandler handler) {
 
+    public void use(String path, RequestHandler.MiddlewareRequestHandler handler) {
+        this.routeHandler.addRoute(RequestMethod.ANY, path, handler);
+    }
+
+    public void use(RequestHandler.BasicRequestHandler handler) {
+        this.routeHandler.addRoute(RequestMethod.ANY, "*", handler);
+    }
+
+    public void use(String path, RequestHandler.BasicRequestHandler handler) {
+        this.routeHandler.addRoute(RequestMethod.ANY, path, handler);
     }
 
 
@@ -109,16 +122,29 @@ public class Bottle {
     public static void main(String[] args) {
         Bottle btl = new Bottle(9999);
         btl.get("/", (req, res) -> {
-            res.renderHTML("not-found.html");
+            res.renderHTML("index.html");
         });
 
 
-        btl.post("/" , (req, res) -> {
+        btl.post("/", (req, res) -> {
             res.json("{\"jojoe\": 1}");
         });
 
         btl.get("/debug", (req, res) -> {
             res.writeBody(String.format("Headers: %s\nRequest Query: %s \n", req.getHeaders(), req.getQuery()));
+        });
+
+        btl.use((req, res) -> {
+            res.setStatus(404);
+            try {
+                res.renderHTML("not-found.html");
+            } catch (FileNotFoundException e) {
+                System.out.println("not-found.html file not found. ok.");
+            }
+        });
+
+        btl.use("/appl", (req, res, next) -> {
+            next.run();
         });
 
         btl.start();

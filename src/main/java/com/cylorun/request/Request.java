@@ -46,6 +46,7 @@ public class Request {
         int contentLength =  contentLenHeader == null ? 0 : Integer.parseInt(contentLenHeader.trim());
         String requestBodyStr = getBodyFromBuffer(in, contentLength).orElse(null);
         RequestBody reqBody = BodyFactory.createBody(requestBodyStr, ContentType.fromName("Content-Type").orElse(null)).orElse(null);
+
         return new Request(method, headers, fullRequestPath, queryParams, reqBody);
     }
 

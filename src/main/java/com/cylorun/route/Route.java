@@ -12,4 +12,12 @@ public class Route {
         this.method = method;
         this.path = path;
     }
+
+    @Override
+    public String toString() {
+        return "Route{" +
+                "method=" + method +
+                ", path='" + path + '\'' +
+                '}';
+    }
 }
